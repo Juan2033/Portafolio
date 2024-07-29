@@ -1,0 +1,47 @@
+
+        body {
+            background-color: black;
+        }        
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #sugerencias-list {
+        display: none;
+        margin-top: 5px;
+        padding: 0;
+        list-style-type: none;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #sugerencias-list li {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        #sugerencias-list li:hover {
+            background-color: #f0f0f0;
+        }
+        #ciudad {
+    width: 100%; /* Hacer el campo ciudad del mismo ancho que los otros campos */
+        }
+
+        #declararValor {
+            margin-bottom: 10px; /* Agregar un margen inferior al campo de declaración de valor */
+        }        
+
+        .form-label{
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif
+        }
+        

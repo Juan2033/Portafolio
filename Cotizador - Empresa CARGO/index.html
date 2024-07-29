@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />    
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+        crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+</head>
+
+
+<body>    
+    <!-- Formulario Principal -->
+    <form id="formularioCiudades" class="container mt-3">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="ciudad" class="form-label" style="color: rgb(255,255,255);">Ingrese ciudad de recogida:</label>
+                <input type="text" id="ciudad" class="form-control" />
+                <ul id="sugerencias-list"></ul>
+            </div>
+            <div class="col-md-4">
+                <label for="destino" class="form-label" style="color: rgb(255,255,255);">Ingrese el destino de envío:</label>
+                <select id="destino" class="form-control">
+                    <option value="0" selected>Seleccione un país</option>
+                    <option value="Mexico">México</option>
+                    <option value="Guatemala">Guatemala</option>
+                    <option value="El Salvador">El Salvador</option>
+                    <option value="Honduras">Honduras</option>
+                    <option value="Nicaragua">Nicaragua</option>
+                    <option value="Colombia">Colombia</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="tamaño" class="form-label" id="form-label-one" style="margin-bottom: 8px; color: rgb(255,255,255);">Seleccione su tamaño de caja:</label>
+                <select id="tamaño" class="form-control">
+                    <option value="0" selected>Escoga una opcion</option>
+                    <!-- Introduce los tamaños aquí -->
+                    <option value="1">14X14X14</option>
+                    <option value="2">16X16X16</option>
+                    <option value="3">18X18X18</option>
+                    <option value="4">20X20X20</option>
+                    <option value="5">22X22X22</option>
+                    <option value="6">24X24X24</option>
+                    <option value="7">30X24X24</option>
+                    <option value="8">30X30X30</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4" id="cantidadLibras" style="display: none; color: rgb(255,255,255); margin-top: 8px;">
+            <label for="libras" class="form-label">Ingrese la cantidad de libras:</label>
+            <input type="number" id="libras" class="form-control"/>
+            <button id="infoLibras" class="btn btn-outline-secondary btn-sm" style="margin-top: 5px; background-color: #3498db;" type="button"><i class="fas fa-info-circle"></i></button>
+        </div>      
+
+        <div class="col-md-4" id="declararValor" style="display: none; color: rgb(255,255,255); margin-top: 8px;">
+            <label for="libras" class="form-label" id="form-label-two">Declare el valor de su articulo:</label>
+            <input type="number" id="declarar" class="form-control" oninput="validarNumero(this)" placeholder="Ingrese en valor en dolares, sin signos" />
+        </div>    
+    </form>
+    <!-- Formulario Principal -->
+
+    <!-- Boton para calcular la sucursal más cercana -->
+    <button type="button" id="btnCalcular" class="btn btn-primary mt-3">Cotizar</button>
+
+    <!-- Script -->
+    <script>
+      
+      const infoLibras = document.getElementById("infoLibras");
+      const ciudadInput = document.getElementById("libras");
+
+    // Agregamos un evento de clic al botón de información
+    infoLibras.addEventListener("click", function() {
+        // Mostramos la información relevante, por ejemplo, un mensaje
+        alert("Recuerde que el envio maximo son 60 lb");
+    });
+
+        // Coordenadas de las sucursales y precios por tamaño de caja y destino
+        const sucursales = {
+            "Oregon": { // Listo con valores NUEVOS
+                lat: 45.4768211, 
+                lon: -122.8042533,
+                precios: {
+                    mexico: [105.00, 145.00, 165.00, 205.00, 245.00, 285.00, 365.00, 490.00],
+                    guatemala: ["N/A", "N/A", "N/A", "N/A", 200.00, 245.00, 275.00, 325.00],
+                    "el salvador": ["N/A", "N/A", "N/A", "N/A", "N/A", 340.00, 360.00, 390.00],
+                    honduras: ["N/A", "N/A", "N/A", "N/A", 200.00, 245.00, 275.00, 325.00],
+                    nicaragua: ["N/A", "N/A", "N/A", "N/A", 300.00, 325.00, 350.00, 380.00],
+                },
+            },
+            "San Francisco": { // Listo con valores NUEVOS
+                lat: 37.4776453,
+                lon: -122.2125753,
+                precios: {
+                    mexico: [100.00, 140.00, 165.00, 200.00, 245.00, 285.00, 365.00, 470.00],
+                    guatemala: ["N/A", "N/A", "N/A", "N/A", 225.00, 250.00, 270.00, 300.00],
+                    "el salvador": ["N/A", "N/A", "N/A", "N/A", "N/A", 325.00, 340.00, 370.00],
+                    honduras: ["N/A", "N/A", "N/A", "N/A", 225.00, 250.00, 270.00, 300.00],
+                    nicaragua: ["N/A", "N/A", "N/A", "N/A", "N/A", 325.00, 350.00, 380.00],
+                },
+            },
+            "Los Angeles": { // Listo con valores NUEVOS
+                lat: 34.2609565,
+                lon: -118.4295791,
+                precios: {
+                    mexico: [100.00, 140.00, 160.00, 200.00, 240.00, 290.00, 360.00, 455.00],
+                    guatemala: ["N/A", "N/A", "N/A", "N/A", 210.00, 245.00, 250.00, 290.00],
+                    "el salvador": ["N/A", "N/A", "N/A", "N/A", "N/A", 280.00, 340.00, 365.00],
+                    honduras: ["N/A", "N/A", "N/A", "N/A", 190.00, 230.00, 250.00, 285.00],
+                    nicaragua: ["N/A", "N/A", "N/A", "N/A", 250.00, 300.00, 325.00, 350.00],
+                },
+            },            
+            "Las vegas": { // Listo con valores NUEVOS
+                lat: 36.1739135,
+                lon: -115.0763079,
+                precios: {
+                    mexico: [100.00, 140.00, 165.00, 200.00, 245.00, 285.00, 365.00, 470.00],
+                    guatemala: ["N/A", "N/A", "N/A", "N/A", 225.00, 250.00, 270.00, 300.00],
+                    "el salvador": ["N/A", "N/A", "N/A", "N/A", "N/A", 325.00, 340.00, 370.00],
+                    honduras: ["N/A", "N/A", "N/A", "N/A", 225.00, 250.00, 270.00, 300.00],
+                    nicaragua: ["N/A", "N/A", "N/A", "N/A", "N/A", 325.00, 350.00, 380.00],
+                },
+            },
+            "Nw Arkansas": { //Listo con valores
+                lat: 36.3163018,
+                lon: -94.1277458,
+                precios: {
+                    mexico: [110.00, 150.00, 170.00, 210.00, 245.00, 295.00, 365.00, 490.00],
+                    guatemala: ["N/A", "N/A", "N/A", "N/A", 200.00, 245.00, 275.00, 325.00],
+                    "el salvador": ["N/A", "N/A", "N/A", "N/A", "N/A", 340.00, 360.00, 390.00],
+                    honduras: ["N/A", "N/A", "N/A", "N/A", 200.00, 245.00, 275.00, 325.00],
+                    nicaragua: ["N/A", "N/A", "N/A", "N/A", 300.00, 325.00, 350.00, 380.00],
+                },
+            },
+        };
+        // Coordenadas de las sucursales y precios por tamaño de caja y destino
+
+        // Tamaños de cajas
+        const tamaños = [
+            "14X14X14",
+            "16X16X16",
+            "18X18X18",
+            "20X20X20",
+            "22X22X22",
+            "24X24X24",
+            "30X24X24",
+            "30X30X30",
+        ];
+        // Tamaños de cajas
+
+        // Autocompletar 
+        function autocompletarUbicacion(entradaUsuario) {
+            const apiKey = '4e5ba0fe17df4b2b8378939cf6ca0692'; // Reemplaza 'TU_API_KEY' con tu propia clave API de OpenCage Geocoding
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(entradaUsuario)}&key=${apiKey}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const sugerenciasList = document.getElementById('sugerencias-list');
+                    sugerenciasList.innerHTML = ''; // Limpiar sugerencias anteriores
+                    if (data.results.length > 0) {
+                        data.results.forEach(result => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = result.formatted;
+                            listItem.addEventListener('click', function() {
+                                document.getElementById('ciudad').value = result.formatted;
+                                sugerenciasList.style.display = 'none'; // Ocultar la lista después de seleccionar una sugerencia
+                            });
+                            sugerenciasList.appendChild(listItem);
+                        });
+                        sugerenciasList.style.display = 'block'; // Mostrar la lista
+                    } else {
+                        sugerenciasList.style.display = 'none'; // Ocultar la lista si no hay sugerencias
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al obtener sugerencias de autocompletado:", error);
+                });
+        }
+        
+        const ubicacionInput = document.getElementById('ciudad');
+        ubicacionInput.addEventListener('input', function() {
+            const entradaUsuario = this.value;
+            autocompletarUbicacion(entradaUsuario);
+        });
+        // Autocompletar 
+
+        // Función para calcular la distancia entre dos puntos geográficos
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radio de la Tierra en kilómetros
+            const dLat = ((lat2 - lat1) * Math.PI) / 180; // Convertir a radianes
+            const dLon = ((lon2 - lon1) * Math.PI) / 180;
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos((lat1 * Math.PI) / 180) *
+                Math.cos((lat2 * Math.PI) / 180) *
+                Math.sin(dLon / 2) *
+                Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distancia = R * c; // Distancia en kilómetros
+            return distancia;
+        }
+        // Función para calcular la distancia entre dos puntos geográficos
+
+        // Función para obtener las coordenadas de la ciudad ingresada por el usuario
+        async function obtenerCoordenadas(ciudad) {
+            const apiKey = "4e5ba0fe17df4b2b8378939cf6ca0692"; // Reemplazar con tu clave de API de OpenCage
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+                ciudad
+            )}&key=${apiKey}&language=es`;
+            try {
+                const response = await axios.get(url);
+                const results = response.data.results;
+                if (results.length > 0) {
+                    const geometry = results[0].geometry;
+                    return { lat: geometry.lat, lon: geometry.lng };
+                } else {
+                    throw new Error(
+                        "No se encontraron coordenadas para la ciudad ingresada."
+                    );
+                }
+            } catch (error) {
+                console.error("Error al obtener las coordenadas:", error);
+                throw error;
+            }
+        }
+        // Función para obtener las coordenadas de la ciudad ingresada por el usuario        
+
+        // Función para encontrar la sucursal más cercana
+        async function encontrarSucursalMasCercana(ciudad, destino) {
+            try {
+                const coordenadasCiudad = await obtenerCoordenadas(ciudad);
+                let distanciaMinima = Infinity;
+                let sucursalMasCercana = null;
+                for (const [nombreSucursal, datosSucursal] of Object.entries(
+                    sucursales
+                )) {
+                    const distancia = calcularDistancia(
+                        coordenadasCiudad.lat,
+                        coordenadasCiudad.lon,
+                        datosSucursal.lat,
+                        datosSucursal.lon
+                    );
+                    if (distancia < distanciaMinima) {
+                        distanciaMinima = distancia;
+                        sucursalMasCercana = {
+                            nombre: nombreSucursal,
+                            precios: datosSucursal.precios[destino.toLowerCase()],
+                            ciudad: ciudad,
+                        };
+                    }
+                }
+                return sucursalMasCercana;
+            } catch (error) {
+                console.error("Error al encontrar la sucursal más cercana:", error);
+                throw error;
+            }
+        }
+        // Función para encontrar la sucursal más cercana  
+
+        // Direccion sucursales  
+        function obtenerDireccion(nombreSucursal) {
+        switch (nombreSucursal) {
+            case "Oregon":
+                return "12385 SW Allen Blvd Beaverton OR 97005 / ☎ Tel (503) 922 22 21";
+            case "San Francisco":
+                return "2603 Middlefield Rd Redwood City, Ca 94063 / ☎ Tel (415) 942 69 69";
+            case "Los Angeles":
+                return "13619 Van Nuys blv Pacoima Ca 91331 / ☎ Tel (818) 582 4050";
+            case "Las vegas":
+                return "4550 E Bonanza Rd Ste F Las Vegas NV 89110 / ☎ Tel (702)992-0192";
+            case "Nw Arkansas":
+                return "1714 S 8th st Rogers AR 72756 / ☎ Tel (479) 265 9001";
+            default:
+                return "Dirección no encontrada";
+        }
+    }
+        // Direccion sucursales
+
+        function validarNumero(input) {
+        // Remover cualquier carácter que no sea un número
+        input.value = input.value.replace(/\D/g, '');
+}
+        
+        
+
+        document.getElementById("destino").addEventListener("change", function (){  
+                let destinoS = this.value;                  
+                let divCantidadLibras = document.getElementById("cantidadLibras");
+                let divDeclararValor = document.getElementById("declararValor");
+                if (destinoS.toLowerCase() === "colombia"){
+                    document.getElementById("tamaño").style.display = "none"; // Ocultamos el input tamaño
+                    document.getElementById("form-label-one").style.display = "none"; // Ocultamos el titulo del input tamaño
+                    divCantidadLibras.style.display = "block"; // Ocultar DIV de libras
+                    divDeclararValor.style.display = "block"; // Ocultar DIV de declarar valor
+                }else{
+                    document.getElementById("tamaño").style.display = "block"; 
+                    document.getElementById("form-label-one").style.display = "block";
+                    divCantidadLibras.style.display = "none"; // Mostrar DIV de libras
+                    divDeclararValor.style.display = "none"; // Mostrar DIV de declarar valor
+                }
+                });
+        
+        // Ciudades cargo 20 dolares
+        const ciudadesConCargoAdicional = ["Palmdale", "Lancaster", "Bakersfield", "Fresno", "Santa Barbara", "San Juan Capistrano",
+        "Murrieta", "Moreno Valley", "Perris", "Hesperia", "Victorville", "Saint George, Utah", "Mesquite, Nevada", "Kingman, Arizona",
+        "Yakima", "Eugene", "Medford", "Bend", "Pasco", "Wenatchee", "The Dalles"];
+        // Ciudades cargo 20 dolares
+        
+// Manejar clic en el botón "Calcular sucursal más cercana"
+    document.getElementById("btnCalcular").addEventListener("click", async () => {
+
+    const librasInput = document.getElementById("libras"); // Capturamos input "Ingrese la cantidad de libras:"
+    const cantidadLibras = document.getElementById("cantidadLibras"); // Capturamos DIV cantidad de libras
+    
+    const declararValor = document.getElementById("declarar"); // Capturamos input "Declare el valor de su articulo:"
+    const declararDiv = document.getElementById("declararValor"); // Capturamos DIV declarar valor
+
+    const ciudadInput = document.getElementById("ciudad"); // Capturamos input ciudad
+
+    const destinoInput = document.getElementById("destino"); // Capturamos select destino 
+
+    const tamañoInput = document.getElementById("tamaño"); // Capturamos select tamaño
+
+   // Variables capturadas y sin espacios
+    const ciudad = ciudadInput.value.trim(); // Espacios limpios y listos
+    const destino = destinoInput.value.trim(); // Espacios limpios y listos
+    const tamañoCaja = tamañoInput.value.trim(); // Espacios limpios y listos
+    const libras = librasInput.value.trim(); // Espacios limpios y listos
+   // Variables capturadas y sin espacios   
+    
+    // REVISON //
+    // const textoDeclarar = document.querySelector("#form-label-two") // PENDIENTE DE REVISION    
+    // const ciudadConCargo = ciudadesConCargoAdicional.includes(ciudad.toLowerCase()); // PENDIENTE DE REVISION
+   // REVISON //
+
+    if (ciudad !== "" && destino !== "0" && ((destino.toLowerCase() !== "colombia" && tamañoCaja !== "0") || (destino.toLowerCase() === "colombia" && libras !== ""))) {
+        
+        // LOGICA LIBRAS > 60 COLOMBIA //
+        if (destino.toLowerCase() === "colombia") { // Si en la caja de "Ingrese el destino de envío:" se ha seleccionado Colombia
+            const librasAEnviar = Number(libras); // Trasnformamos el campo "Ingrese la cantidad de libras" en NUMERO y lo almacenamos en una constante
+            if (librasAEnviar > 60) { // Si el numero de el campo que capturamos en la constante es mayor a 60 entonces..
+                Swal.fire({
+                    title: "Error",
+                    text: "Lo sentimos, el envío máximo permitido es de 60 libras.",
+                    icon: "error",
+                    confirmButtonText: "Aceptar",
+                });
+                return; // Detener el proceso si la cantidad de libras es mayor que 60
+            }
+        }        
+        // LOGICA LIBRAS > 60 COLOMBIA //
+
+        
+// INICIO TRY
+        try {            
+            const sucursalMasCercana = await encontrarSucursalMasCercana(ciudad, destino); // Esperamos a que encontrarSucursalMasCercana se resuelva y el resultado se almacene en la variable "sucursalMasCercana" con todos los datos (Ciudad, Destino)
+            
+            if (sucursalMasCercana) { // Si sucursalMasCercana se completo correctamente, y tiene valores en "Ciudad" y "Destino" es TRUE                          
+        // LOGICA DE COLOMBIA BASE //      
+                if (destino.toLowerCase() === "colombia") { // Si el valor de "Destino" es igual a "Colombia"             
+                
+                    const precioPorLibra = 3.50; // Precio de cada libra
+                    let valorDeclarado = Number(declararValor.value); // Convertimos en numero el valor ingresado en el input "Declare el valor de su articulo:"
+                    let librasAEnviar = Number(libras); // Convertimos en numero el valor ingresado en el input "Ingrese la cantidad de libras:"
+
+                    if (librasAEnviar < 15) {
+                        librasAEnviar = 15; // Mínimo 15 libras
+                    } else if (librasAEnviar > 60) {
+                        librasAEnviar = 60; // Máximo 60 libras
+                        alert("Recuerda que enviamos máximo solo 60 libras");
+                    }
+
+                    let costoEnvio = librasAEnviar * precioPorLibra; // Costo base por libras
+                    let costoValorDeclarado = valorDeclarado * 0.28 + valorDeclarado * 0.05; // Suma del 28% y 5% del valor declarado
+                    costoEnvio += costoValorDeclarado; // Sumar el costo del valor declarado al costo base
+                    costoEnvio += 10; // Costo adicional de manejo y envío
+                    
+
+                    const costoTotal = costoEnvio.toFixed(2); // Imprima 2 numeros luego del punto decimal    
+                    
+                    const ciudadNormalizada = ciudad.toLowerCase().trim();
+                    const ciudadNormalizadaSinDiacriticos = ciudadNormalizada.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+                // Recorrer el arreglo de ciudades y verificar si alguna coincide
+                for (let i = 0; i < ciudadesConCargoAdicional.length; i++) {
+                    const ciudadArregloNormalizada = ciudadesConCargoAdicional[i].toLowerCase().trim();
+                    const ciudadArregloNormalizadaSinDiacriticos = ciudadArregloNormalizada.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    if (ciudadNormalizadaSinDiacriticos.includes(ciudadArregloNormalizadaSinDiacriticos)) {                        
+                        costoEnvio += 20; // Sumar $20 al costo de envío
+                    }
+                }                   
+
+                    const costoEnvioFormateado = costoEnvio.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                    });                   
+
+                    Swal.fire({
+                        title: "Precio para Colombia",
+                        html: `La sucursal más cercana a ${ciudad} es la sucursal: ${sucursalMasCercana.nombre}<br>Dirección: ${obtenerDireccion(sucursalMasCercana.nombre)}<br>El precio para el envío a Colombia es: ${costoEnvioFormateado} USD`,
+                        icon: "info",
+                        confirmButtonText: "Aceptar",
+                    });                    
+                
+                    // Mostrar campo de declaración de valor para Colombia
+                    // declararValor.style.display = "block";
+        // LOGICA DE COLOMBIA BASE //        
+                    
+                } else { // Si destino es diferente de colombia, se aplica la logica de las cajas para los otros paises
+        // LOGICA CAJAS OTROS PAISES //  
+
+                    const precio = sucursalMasCercana.precios[tamañoCaja - 1];                                       
+                    if (precio !== undefined) {   
+                        Swal.fire({
+                            title: "Precio Disponible",
+                            html: `La sucursal más cercana a ${ciudad} es la sucursal: ${sucursalMasCercana.nombre}<br>Dirección: ${obtenerDireccion(sucursalMasCercana.nombre)}<br>El precio para el tamaño de caja ${tamaños[tamañoCaja - 1]} es: ${precio.toFixed(2)} USD`,
+                            icon: "info",
+                            confirmButtonText: "Aceptar",
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Precio no disponible",
+                            text: "Lo sentimos, el precio para el tamaño de caja seleccionado no está disponible.",
+                            icon: "error",
+                            confirmButtonText: "Aceptar",
+                        });
+                    }
+                }
+        // LOGICA CAJAS OTROS PAISES //
+
+            } else { // Si la variable "sucursalMasCercana" no se cumple (FALSE), aparece este mensaje
+                Swal.fire({
+                    title: "Sucursal no encontrada",
+                    text: `No se encontró una sucursal cerca de ${ciudad}.`,
+                    icon: "error",
+                    confirmButtonText: "Aceptar",
+                });
+            }
+
+// FINAL TRY
+
+        // LOGICA DE ERROR DEL TRY
+        } catch (error) {
+            Swal.fire({
+                title: "Error",
+                text: "Ocurrió un error al encontrar la sucursal más cercana. Por favor, inténtalo de nuevo.",
+                icon: "error",
+                confirmButtonText: "Aceptar",
+            });
+        // LOGICA DE ERROR DEL TRY
+
+
+        } finally {
+            if (destinoInput.value.toLowerCase() !== "colombia") {   
+            ciudadInput.value = "";
+            destinoInput.value = 0;
+            tamañoInput.value = 0;
+            declararValor.value = "";
+            librasInput.value = "";  
+        }        
+        }
+
+    // LOGICA DE MANEJO DEL PRIMER IF PARA QUE TODOS LOS CAMPOS ESTEN COMPLETOS  
+    } else {
+        Swal.fire({
+            title: "Error",
+            text: "Por favor, complete todos los campos antes de calcular la sucursal más cercana.",
+            icon: "error",
+            confirmButtonText: "Aceptar",
+        });
+    }
+    // LOGICA DE MANEJO DEL PRIMER IF PARA QUE TODOS LOS CAMPOS ESTEN COMPLETOS  
+});
+        
+</script>
+</body>
+</html>
