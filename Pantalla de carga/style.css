@@ -1,0 +1,38 @@
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh ;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center; 
+    background-color: #fff9; 
+     
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.9rem;
+    font-size: 1.2rem;
+    font-weight: bold;        
+
+}
+
+.loading__animation {
+    height: 2em;
+    width: 2em;
+    margin-top: 1em;
+    border: 5px solid #fff9;
+    border-left-color: #48e;
+    border-top-color: #48e;
+    border-radius: 50%;
+    animation: rotate 600ms infinite linear;
+}
+
+@keyframes rotate { to { transform: rotate(1turn)}
+}
