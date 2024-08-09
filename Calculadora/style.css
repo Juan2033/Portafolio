@@ -1,0 +1,120 @@
+* {
+    box-sizing: border-box;
+}
+
+div, ul, nav, li, body, a {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;    
+    background-color: rgb(255, 255, 255); 
+    font-family: sans-serif; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;    
+    gap: 50px;
+}
+
+/* SECCION DE CABECERA */
+header {
+    background-color: #777373;
+    padding: 20px;    
+    width: 100%;    
+    position: sticky;
+    top: 0;
+}
+
+ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;     
+}
+
+.nav__li {
+    list-style: none;
+    transition: background-color 300ms ease-in;
+    padding: 5px;
+    border-radius: 1em;
+}
+
+.nav__li:hover {
+    background-color: rgb(228, 224, 219);
+    filter: brightness(1.6);
+    opacity: 0.9;
+    border-radius: 1em;    
+}
+
+.nav__link {
+    text-decoration: none;
+    color: #000000;
+}
+
+/* SECCION DE CALCULADORA */
+
+.calculator {
+    display: flex;
+    flex-direction: column; 
+    margin-top: 5vh; /* Reducido para que no esté tan abajo */
+    flex: 0 1 auto; /* Cambiado para que no crezca indefinidamente */
+    min-width: 300px; /* Aumentado el ancho mínimo */
+    width: 80%; /* Ocupará el 80% del ancho del contenedor padre */
+    max-width: 500px; /* Limitamos el ancho máximo */
+    box-shadow: 0 0 20px rgba(0,0,0,0.2); /* Añadimos una sombra para destacar */
+    border-radius: 1em; /* Redondeamos las esquinas de toda la calculadora */
+}
+
+.calculator__display {
+    background-color: #0006;
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
+    padding: 1em; /* Aumentado el padding */
+    font-size: 1.5em; /* Aumentado el tamaño de fuente */
+    text-align: right; /* Alineamos el texto a la derecha */
+    color: white; /* Cambiamos el color del texto para mejor contraste */
+}
+
+.calculator__keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 1fr); /* Aumentado a 5 filas para más espacio */
+    grid-gap: 1px; /* Añadimos un pequeño espacio entre las teclas */
+    background-color: #ddd; /* Color de fondo para el área de teclas */
+}
+
+.calculator__keys button {
+    padding: 1em; /* Aumentamos el padding de los botones */
+    font-size: 1.2em; /* Aumentamos el tamaño de fuente de los botones */
+    border: none;
+    background-color: white;
+    transition: background-color 0.3s;
+}
+
+.calculator__keys button:hover {
+    background-color: #f0f0f0;
+}
+
+.key--equal {
+    grid-column: 4/5;
+    grid-row: 2/6;
+    background-color: #f39c12 !important; /* Color destacado para el botón igual */
+    color: white;
+}
+
+footer {
+    background-color: #777373;
+    width: 100%;
+    margin-top: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Media query para pantallas más pequeñas */
+@media (max-width: 480px) {
+    .calculator {
+        width: 95%;
+        min-width: auto;
+    }
+}
